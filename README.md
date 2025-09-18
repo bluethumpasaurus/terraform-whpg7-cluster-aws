@@ -97,6 +97,7 @@ Before you begin, ensure you have the following installed and configured:
 3.  **Terraform:** Terraform CLI (version 1.0 or later) installed.
 4.  **SSH Key Pair:** A public/private SSH key pair that you will use when connecting to the cluster. If you don't have one, you can generate it with `ssh-keygen -t rsa`.
 5.  **EDB Repo Token:** You need a valid EDB repository token to download WarehousePG. This is passed as a sensitive variable.
+5.  **Public IP Address of your Jumpbox host:** You will need to designate a single public ip address that you will `ssh` to the cluster from.
 
 -----
 
