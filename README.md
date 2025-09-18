@@ -180,7 +180,6 @@ The deployment process is broken down into two main phases:
 
     The `configure-instance.sh` script created a `gpadmin` user. Switch to this user to perform all cluster setup tasks. 
 
-    The default password is `changeme@123`, but you can use `sudo` without a password.
 
     ```bash
     sudo su - gpadmin
