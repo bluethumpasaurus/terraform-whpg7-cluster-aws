@@ -1,0 +1,254 @@
+
+-----
+
+# Deploy a 4-Node WarehousePG Cluster on AWS with Terraform
+
+This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node WarehousePG 7 (a fork of Greenplum) cluster on AWS.
+
+The deployment is managed by a user-friendly wrapper script (`deploy.sh`) that prompts for necessary configuration details, making the setup process straightforward.
+
+-----
+
+## 🏛️ Architecture
+
+The Terraform scripts will provision the following AWS resources, creating a logically separated and secure environment for the WarehousePG cluster:
+
+  * **VPC:** A dedicated Virtual Private Cloud with a `10.0.0.0/16` CIDR block to isolate the cluster network.
+  * **Subnets:**
+      * A **public subnet** (`10.0.1.0/24`) for the Coordinator and Standby Coordinator nodes.
+      * A **private subnet** (`10.0.2.0/24`) for the two Segment nodes.
+  * **Internet & NAT Gateways:**
+      * An Internet Gateway to allow outbound internet access from the public subnet.
+      * A NAT Gateway placed in the public subnet, enabling instances in the private subnet (the segment nodes) to access the internet for software downloads without being publicly exposed.
+  * **EC2 Instances:** Four EC2 instances based on a Rocky Linux 8.9 AMI (`ami-020c6cfb9f8b61b53`).
+      * **Server 1 (Coordinator):** In the public subnet with a public Elastic IP.
+      * **Server 2 (Standby Coordinator):** In the public subnet with a public Elastic IP.
+      * **Server 3 (Segment 1):** In the private subnet.
+      * **Server 4 (Segment 2):** In the private subnet.
+  * **Security Group:** A single security group that:
+      * Allows inbound SSH access from the jumpbox.
+      * Allows all internal traffic within the VPC for seamless communication between cluster nodes.
+      * Allows ICMP (ping) from any source.
+  * **Elastic IPs:** Two Elastic IPs are assigned to the Coordinator and Standby Coordinator nodes to provide them with static public IP addresses.
+
+### Architecture Diagram
+
+
+```mermaid
+graph TD
+    subgraph "Internet"
+        jumpbox["fa:fa-laptop<br>Jumpbox / Bastion Host"]
+    end
+
+    subgraph "AWS Cloud"
+        subgraph "VPC (10.0.0.0/16)"
+            subgraph "Public Subnet (10.0.1.0/24)"
+                Coordinator["fa:fa-server<br><b>Server 1 (Coordinator)</b>"]
+                Standby["fa:fa-server<br><b>Server 2 (Standby)</b>"]
+                NAT["fa:fa-route<br>NAT Gateway"]
+            end
+            subgraph "Private Subnet (10.0.2.0/24)"
+                %% --- Invisible padding nodes for the top and bottom ---
+                top_pad[" "]
+                Segment1["fa:fa-server<br><b>Server 3 (Segment 1)</b>"]
+                Segment2["fa:fa-server<br><b>Server 4 (Segment 2)</b>"]
+                bottom_pad[" "]
+            end
+        end
+        InternetGateway["fa:fa-globe<br>Internet Gateway"]
+        EIP1["fa:fa-location-dot<br>Elastic IP 1"]
+        EIP2["fa:fa-location-dot<br>Elastic IP 2"]
+    end
+
+    %% --- Style the padding nodes to be invisible ---
+    style top_pad fill:transparent,stroke:transparent
+    style bottom_pad fill:transparent,stroke:transparent
+
+    %% --- Define visible connections (13 total) ---
+    jumpbox -- "SSH" --> EIP1
+    jumpbox -- "SSH" --> EIP2
+    EIP1 --> Coordinator
+    EIP2 --> Standby
+    NAT --> InternetGateway
+    Coordinator <--"Interconnect"--> Segment1
+    Coordinator <--"Interconnect"--> Segment2
+    Coordinator <--"Replication"--> Standby
+    Standby <--"Interconnect"--> Segment1
+    Standby <--"Interconnect"--> Segment2
+    Segment1 <--"Interconnect"--> Segment2
+    Segment1 --"Outbound NAT"--> NAT
+    Segment2 --"Outbound NAT"--> NAT
+
+    %% --- Add the invisible link to force height ---
+    top_pad ~~~ bottom_pad
+
+    %% --- Style the VERY LAST link (the 14th one, index 13) to be invisible ---
+    linkStyle 13 stroke-width:0px
+```
+
+-----
+
+## ✅ Prerequisites
+
+Before you begin, ensure you have the following installed and configured:
+
+1.  **AWS Account:** An active AWS account with permissions to create the resources listed above.
+2.  **AWS CLI:** The AWS Command Line Interface installed and configured with your credentials. The `deploy.sh` script specifically uses a named profile.
+3.  **Terraform:** Terraform CLI (version 1.0 or later) installed.
+4.  **SSH Key Pair:** A public/private SSH key pair that you will use when connecting to the cluster. If you don't have one, you can generate it with `ssh-keygen -t rsa`.
+5.  **EDB Repo Token:** You need a valid EDB repository token to download WarehousePG. This is passed as a sensitive variable.
+
+-----
+
+## 🚀 Deployment Steps
+
+The deployment process is broken down into two main phases:
+
+1.  **Infrastructure Provisioning** using the `deploy.sh` script and Terraform.
+2.  **Cluster Initialization** using the `setup_whpg.sh` script on the coordinator node.
+
+### Phase 1: Infrastructure Provisioning
+
+1.  **Clone the Repository**
+
+    ```bash
+    git clone https://github.com/bluethumpasaurus/friendly-chainsaw
+    cd friendly-chainsaw
+    ```
+
+2.  **Run the Deployment Script**
+
+    Make the `deploy.sh` script executable and run it. This script will guide you through the configuration process.
+
+    ```bash
+    chmod +x deploy.sh
+    ./deploy.sh
+    ```
+
+3.  **Provide Configuration Details**
+\
+    The script will prompt you for the following information. You can press Enter to accept the default values in brackets.
+
+      * `Enter your AWS IAM Profile Name`: The named AWS profile to use for authentication.
+      * `Enter the AWS Region`: The AWS region for deployment.
+      * `Enter the EC2 Instance Type`: The instance size for all four nodes.
+      * `Enter a unique name for your cluster`: A prefix for all created resources.
+      * `Enter the ip address to be used for SSH`: This will limit `ssh` access to ONLY this ip address.
+      * `Enter the path to the SSH PUBLIC KEY`: The path to your `.pub` file.
+      * `Enter the path to the SSH PRIVATE KEY`: The path to your private key file.
+      * `Enter your EDB Repo Token`: Your secret token from EDB.
+
+4.  **Review and Apply Terraform Plan**
+
+    The script will initialize Terraform (`terraform init`) and show you an execution plan (`terraform plan`). Review the plan and, when prompted, type `yes` to create the resources in AWS with `terraform apply`.
+
+    Typing `no` to the prompt will exit the process, and will give instructions on how to manually perform the  `terraform apply` later.
+
+
+6.  **📋 Gather Terraform Outputs**
+
+    Once the deployment is complete, Terraform will display a list of outputs similar to those shown below. 
+
+    **Copy this entire output section to a text editor.** You will need these IP addresses for the next phase.
+
+    ```
+    Outputs:
+
+    coordinator_private_ip = "10.0.1.100"
+    coordinator_standby_private_ip = "10.0.1.101"
+    segment_server_1_private_ip = "10.0.2.200"
+    segment_server_2_private_ip = "10.0.2.201"
+    ssh_command_for_whpg_coordinator = "ssh -i ~/.ssh/id_rsa rocky@52.123.45.67"
+    ssh_command_for_whpg_coordinator_standby = "ssh -i ~/.ssh/id_rsa rocky@52.123.45.68"
+    ```
+
+### Phase 2: Cluster Initialization
+
+1.  **SSH into the Coordinator Node**
+
+    On the jumpbox, use the `ssh_command_for_whpg_coordinator` command from the Terraform output to connect to the primary coordinator server. 
+
+    You will log in as the `rocky` user.
+
+    ```bash
+    # Use the command from your output
+    ssh -i ~/.ssh/id_rsa rocky@<coordinator_public_ip>
+    ```
+
+2.  **Switch to the `gpadmin` User**
+
+    The `configure-instance.sh` script created a `gpadmin` user. Switch to this user to perform all cluster setup tasks. 
+
+    The default password is `changeme@123`, but you can use `sudo` without a password.
+
+    ```bash
+    sudo su - gpadmin
+    ```
+
+3.  **Create the Setup Script**
+
+    Use a text editor like `vi` or `nano` to create the setup script.
+
+    ```bash
+    vi setup_whpg.sh
+    ```
+
+4.  **Paste the Script Contents**
+
+    Copy the entire contents of the `setup_whpg.sh` file from this repository and paste it into the editor.
+
+5.  **❗ CRITICAL: Update IP Addresses**
+
+    This is the most important manual step. In the `setup_whpg.sh` file you just created, **update the placeholder IP addresses at the top** with the private IP addresses from your Terraform output.
+
+      * `SERVER1_PRIVATE_IP`: Use the `coordinator_private_ip` value.
+      * `SERVER2_PRIVATE_IP`: Use the `coordinator_standby_private_ip` value.
+      * `SERVER3_PRIVATE_IP`: Use the `segment_server_1_private_ip` value.
+      * `SERVER4_PRIVATE_IP`: Use the `segment_server_2_private_ip` value.
+
+    Save and close the file.
+
+6.  **Run the Cluster Initialization Script**
+
+    Make the script executable, `source` it and then run it. This will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
+
+
+    ```bash
+    chmod +x setup_whpg.sh
+    source setup_whpg.sh
+    ./setup_whpg.sh
+    ```
+
+    The script will take a few minutes to complete.
+
+7.  **Verification**
+
+    The script will automatically run `gpstate -f` and a `psql` query at the end to verify that the coordinator standby is active and that all segments are configured correctly.
+
+-----
+
+## 💻 Connecting to the Database
+
+Once the setup is complete, you can connect to your new WarehousePG database.
+
+1.  Ensure you are logged into the **coordinator node** as the **`gpadmin`** user.
+
+2.  The `setup_whpg.sh` script configured the `.bashrc` file with the necessary environment variables. Simply run `psql`:
+
+    ```bash
+    psql
+    ```
+
+You are now connected to the `aws_whpg7` database and can begin creating tables and loading data.
+
+-----
+
+## 🧹 Clean Up
+
+To avoid ongoing AWS charges, you can destroy all the resources created by this project. From your local machine (where you ran `./deploy.sh`), execute:
+
+```bash
+terraform destroy
+```
+
+Type `yes` when prompted to confirm the deletion.
