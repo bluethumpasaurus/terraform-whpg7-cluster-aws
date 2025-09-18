@@ -28,7 +28,7 @@ echo "Press [Enter] to accept the default value shown in brackets."
 echo ""
 
 # For main.tf
-read -p "Enter your AWS IAM Profile Name (e.g., EDBPowerUserIAM-123456789012): " aws_profile
+read -p "Enter your AWS IAM Profile Name (e.g., ACMEPowerUserIAM-12345678910): " aws_profile
 
 # For variables that will go into terraform.tfvars
 read -p "Enter the AWS Region [eu-west-2]: " aws_region

@@ -9,7 +9,7 @@ terraform {
 
 provider "aws" {
   region  = var.aws_region
-  profile = "EDBPowerUserIAM-32816034393" # Using your named SSO profile
+  profile = "XXXXXUserIAM-XXXXXXXX" # Using your named SSO profile
 }
 
 # ------------------------------------------------------------------------------

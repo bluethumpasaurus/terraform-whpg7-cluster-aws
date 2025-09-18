@@ -36,4 +36,18 @@ sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_
 sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
+# --- Set system resources limits per WHPG docs & core size to unlimited ---
+# Define the target configuration file
+CONF_FILE="/etc/security/limits.d/99-gpadmin-limits.conf"
+
+# Append the configuration using a Here Document
+# The '<<' operator creates the file or appends if it exists
+cat << EOF >> "$CONF_FILE"
+* soft nofile 524288
+* hard nofile 524288
+* soft nproc 131072
+* hard nproc 131072
+* soft core unlimited
+EOF
+
 echo "Instance configuration complete."

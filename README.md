@@ -1,9 +1,9 @@
 
 -----
 
-# Deploy a 4-Node WarehousePG Cluster on AWS with Terraform
+# Deploy a 4-node WarehousePG Cluster on AWS with Terraform
 
-This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node WarehousePG 7 (a fork of Greenplum) cluster on AWS.
+This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node [WarehousePG 7](https://warehouse-pg.io/) cluster on AWS.
 
 The deployment is managed by a user-friendly wrapper script (`deploy.sh`) that prompts for necessary configuration details, making the setup process straightforward.
 
@@ -23,12 +23,11 @@ The Terraform scripts will provision the following AWS resources, creating a log
   * **EC2 Instances:** Four EC2 instances based on a Rocky Linux 8.9 AMI (`ami-020c6cfb9f8b61b53`).
       * **Server 1 (Coordinator):** In the public subnet with a public Elastic IP.
       * **Server 2 (Standby Coordinator):** In the public subnet with a public Elastic IP.
-      * **Server 3 (Segment 1):** In the private subnet.
-      * **Server 4 (Segment 2):** In the private subnet.
+      * **Server 3 (Segment host 1):** In the private subnet.
+      * **Server 4 (Segment host 2):** In the private subnet.
   * **Security Group:** A single security group that:
-      * Allows inbound SSH access from the jumpbox.
+      * Allows inbound SSH access from a designated jumpbox ip address.
       * Allows all internal traffic within the VPC for seamless communication between cluster nodes.
-      * Allows ICMP (ping) from any source.
   * **Elastic IPs:** Two Elastic IPs are assigned to the Coordinator and Standby Coordinator nodes to provide them with static public IP addresses.
 
 ### Architecture Diagram
