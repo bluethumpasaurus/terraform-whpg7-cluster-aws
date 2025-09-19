@@ -27,8 +27,6 @@ echo "Please provide the following configuration values."
 echo "Press [Enter] to accept the default value shown in brackets."
 echo ""
 
-# For main.tf
-#read -p "Enter your AWS IAM Profile Name (e.g., ACMEPowerUserIAM-12345678910): " aws_profile
 
 # For variables that will go into terraform.tfvars
 read -p "Enter your AWS IAM Profile Name [ACMEPowerUserIAM-123]: " aws_profile
@@ -83,23 +81,6 @@ EOF
 
 echo "📄 Created terraform.tfvars with your custom values."
 
-# --- Update Files That Are NOT Terraform Variables ---
-# Create backups of files we are about to modify
-#cp main.tf main.tf.bak
-#cp configure-instance.sh.tpl configure-instance.sh.tpl.bak
-#echo "🔒 Backups of original files created (.bak)."
-
-# 1. Update main.tf for the AWS profile
-sed -i.bak "s|profile = \".*\"|profile = \"$aws_profile\"|" main.tf
-echo "🔧 Updated AWS profile in main.tf"
-
-# 2. Update configure-instance.sh for the EDB repo key
-# (Ensure your .sh file has EDB_REPO_TOKEN_PLACEHOLDER in the curl command)
-#sed -i.bak "s|EDB_REPO_TOKEN_PLACEHOLDER|$edb_repo_token|" configure-instance.sh
-#echo "🔧 Updated EDB Repo Token in configure-instance.sh"
-
-echo ""
-echo "🚀 All files have been configured!"
 
 # --- Run Terraform ---
 echo ""
