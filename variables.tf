@@ -13,7 +13,7 @@ variable "instance_type" {
 variable "cluster_name" {
   description = "A unique name for the server cluster."
   type        = string
-  default     = "whpg-rocky-cluster-EDB-evh"
+  default     = "whpg-rocky-cluster"
 }
 
 variable "public_key_path" {
@@ -36,6 +36,12 @@ variable "edb_repo_token" {
 
 variable "jumpbox_ssh_ingress" {
   description = "The ip address of the host that you will ssh to the cluster from."
+  type        = string
+  sensitive   = true # Marks the variable as sensitive in Terraform outputs
+}
+
+variable "aws_profile" {
+  description = "AWS IAM Profile Name."
   type        = string
   sensitive   = true # Marks the variable as sensitive in Terraform outputs
 }

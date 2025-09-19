@@ -9,7 +9,7 @@ terraform {
 
 provider "aws" {
   region  = var.aws_region
-  profile = "XXXXXUserIAM-XXXXXXXX" # Using your named SSO profile
+  profile = var.aws_profile
 }
 
 # ------------------------------------------------------------------------------
