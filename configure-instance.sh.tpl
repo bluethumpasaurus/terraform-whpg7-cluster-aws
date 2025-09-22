@@ -23,7 +23,7 @@ curl -1sSLf https://downloads.enterprisedb.com/${edb_token}/gpsupp/setup.rpm.sh 
 dnf -y install epel-release
 dnf -y install xerces-c-devel
 dnf -y install warehouse-pg-7
-dnf install -y strace sysstat gdb lsof htop telnet sshpass nano tree
+dnf install -y strace sysstat gdb lsof htop telnet sshpass nano tree wget
 
 # Set ownership for greenplum directories
 echo "Setting ownership for Greenplum directories"
