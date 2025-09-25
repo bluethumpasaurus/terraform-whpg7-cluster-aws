@@ -46,6 +46,12 @@ variable "aws_profile" {
   sensitive   = true # Marks the variable as sensitive in Terraform outputs
 }
 
+variable "project" {
+  description = "The name of the project, used for tagging and identification."
+  type        = string
+  default     = "whpg-rocky-cluster"
+}
+
 
 
 

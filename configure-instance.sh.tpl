@@ -25,8 +25,8 @@ dnf -y install xerces-c-devel
 dnf -y install warehouse-pg-7
 dnf install -y strace sysstat gdb lsof htop telnet sshpass nano tree wget
 
-# Set ownership for greenplum directories
-echo "Setting ownership for Greenplum directories"
+# Set ownership for WarehousePG directories
+echo "Setting ownership for WarehousePG directories"
 chown -R "gpadmin:gpadmin" /usr/local/greenplum*
 chgrp -R "gpadmin" /usr/local/greenplum*
 
@@ -36,7 +36,7 @@ sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_
 sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
-# --- Set system resources limits per WHPG docs & core size to unlimited ---
+# --- Set system resources limits per WarehousePG docs & core size to unlimited ---
 # Define the target configuration file
 CONF_FILE="/etc/security/limits.d/99-gpadmin-limits.conf"
 
@@ -49,5 +49,41 @@ cat << EOF >> "$CONF_FILE"
 * hard nproc 131072
 * soft core unlimited
 EOF
+
+# Install MinIO client (mc) on server 1 - WarehousePG Coordinator (index 0)
+if [ ${server_index} -eq 0 ]; then
+  echo "Installing MinIO client (mc) on server 1"
+  wget https://dl.min.io/client/mc/release/linux-amd64/mc
+  chmod +x mc
+  mv mc /usr/local/bin/
+fi
+
+# Install MinIO on server 2 - WarehousePG Standby Coordinator (index 1)
+if [ ${server_index} -eq 1 ]; then
+  echo "Installing MinIO on server 2"
+  wget https://dl.min.io/server/minio/release/linux-amd64/minio.rpm
+  rpm -Uhv minio.rpm
+
+  # Create a user and group for MinIO
+  groupadd -r minio-user
+  useradd -M -r -g minio-user minio-user
+
+  # Create a data directory
+  mkdir -p /data/minio-storage
+  chown -R minio-user:minio-user /data/minio-storage
+
+  # Create the environment file
+  cat << EOF > /etc/default/minio
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=minioadmin
+MINIO_VOLUMES="/data/minio-storage/"
+MINIO_OPTS="--console-address :9001"
+EOF
+
+  # Start and enable the MinIO service
+  systemctl daemon-reload
+  systemctl enable minio
+  systemctl start minio
+fi
 
 echo "Instance configuration complete."

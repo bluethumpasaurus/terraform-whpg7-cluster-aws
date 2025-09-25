@@ -180,21 +180,27 @@ resource "aws_key_pair" "deployer" {
 resource "aws_instance" "server" {
   count = 4
 
-  ami                    = "ami-020c6cfb9f8b61b53"
-  instance_type          = var.instance_type
-  # --- MODIFIED: Conditionally assign subnets ---
+  ami                      = "ami-020c6cfb9f8b61b53"
+  instance_type            = var.instance_type
+
+  # --- Conditionally assign subnets ---
   # Servers 1 & 2 go in the public subnet; Servers 3 & 4 go in the private subnet.
-  subnet_id              = count.index < 2 ? aws_subnet.public.id : aws_subnet.private.id
+
+  subnet_id                = count.index < 2 ? aws_subnet.public.id : aws_subnet.private.id
   # ----------------------------------------------
   vpc_security_group_ids = [aws_security_group.public_access.id]
-  key_name               = aws_key_pair.deployer.key_name
+  key_name                 = aws_key_pair.deployer.key_name
+
+  # Pass ALL required variables to the template file.
   user_data = templatefile("${path.module}/configure-instance.sh.tpl", {
-    edb_token = var.edb_repo_token
+    edb_token    = var.edb_repo_token,  # For the EDB repository
+    server_index = count.index,         # To identify the server (for MinIO)
+    project      = var.project          # Required by another part of your script
   })
 
   tags = {
-    Name     = "${var.cluster_name}-server-${count.index + 1}"
-    Cluster  = var.cluster_name
+    Name    = "${var.cluster_name}-server-${count.index + 1}"
+    Cluster = var.cluster_name
   }
 }
 
