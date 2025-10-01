@@ -253,13 +253,13 @@ MinIO Server is pre-installed on the Standby Coordinator node, with a MinIO driv
 2.  Set up an `mc` alias to connect to the MinIO server on the **standby coordinator node** on the standby's private ip address.
 
     ```bash
-mc alias set standby_minio http://<standby_coordinator_private_ip>:9000/ minioadmin minioadmin
+    mc alias set standby_minio http://<standby_coordinator_private_ip>:9000/ minioadmin minioadmin
     ```
 
 3.  With `mc` confirm the connection to the MinIO server on the **standby coordinator node**.
 
     ```bash
-mc admin info standby_minio
+    mc admin info standby_minio
     ```
 
 -----
