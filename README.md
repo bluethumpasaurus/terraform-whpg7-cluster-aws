@@ -1,9 +1,9 @@
 
 -----
 
-# Deploy a 4-node WarehousePG Cluster on AWS with Terraform
+# Deploy a 4-node WarehousePG Cluster with MinIO on AWS with Terraform
 
-This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node [WarehousePG 7](https://warehouse-pg.io/) cluster on AWS.
+This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node <a href="https://warehouse-pg.io/" target="_blank" rel="noopener noreferrer">WarehousePG 7</a> cluster on AWS. The cluster will also have MinIO Server pre-installed on the Standby Coordinator node.
 
 The deployment is managed by a user-friendly wrapper script (`deploy.sh`) that prompts for necessary configuration details, making the setup process straightforward.
 
@@ -239,6 +239,28 @@ Once the setup is complete, you can connect to your new WarehousePG database.
     ```
 
 You are now connected to the `aws_whpg7` database and can begin creating tables and loading data.
+
+-----
+
+## 💿 Setting up MinIO 
+
+MinIO Server is pre-installed on the Standby Coordinator node, with a MinIO drive setup at `/data/minio-storage/` . The `mc` client is pre-installed on the Coordinator node.
+
+
+
+1.  Ensure you are logged into the **coordinator node** as the **`gpadmin`** user.
+
+2.  Set up an `mc` alias to connect to the MinIO server on the **standby coordinator node** on the standby's private ip address.
+
+    ```bash
+mc alias set standby_minio http://<standby_coordinator_private_ip>:9000/ minioadmin minioadmin
+    ```
+
+3.  With `mc` confirm the connection to the MinIO server on the **standby coordinator node**.
+
+    ```bash
+mc admin info standby_minio
+    ```
 
 -----
 
