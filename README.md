@@ -3,7 +3,9 @@
 
 # Deploy a 4-node WarehousePG Cluster (with MinIO pre-installed) on AWS with Terraform
 
-This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node <a href="https://warehouse-pg.io/" target="_blank" rel="noopener noreferrer">WarehousePG 7</a> cluster on AWS. The cluster will also have MinIO Server pre-installed on the Standby Coordinator node.
+This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node <a href="https://warehouse-pg.io/" target="_blank" rel="noopener noreferrer">WarehousePG 7</a> cluster on AWS.
+
+The cluster will also have MinIO Server pre-installed on the Standby Coordinator node.
 
 The deployment is managed by a user-friendly wrapper script (`deploy.sh`) that prompts for necessary configuration details, making the setup process straightforward.
 
