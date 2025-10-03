@@ -52,6 +52,16 @@ variable "project" {
   default     = "whpg-rocky-cluster"
 }
 
+variable "server_private_ips" {
+  description = "A list of private IPs for the servers in order of creation."
+  type        = list(string)
+  default = [
+    "10.0.1.100", # Server 1 (Coordinator) in public subnet
+    "10.0.1.101", # Server 2 (Standby) in public subnet
+    "10.0.2.200", # Server 3 (Segment 1) in private subnet
+    "10.0.2.201"  # Server 4 (Segment 2) in private subnet
+  ]
+}
 
 
 

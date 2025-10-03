@@ -43,7 +43,7 @@ resource "aws_subnet" "public" {
   }
 }
 
-# --- ADDED: Private Subnet for servers without public IPs ---
+# --- Private Subnet for servers without public IPs ---
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
@@ -73,9 +73,8 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# --- ADDED: EIP and NAT Gateway for private subnet internet access ---
+# --- EIP and NAT Gateway for private subnet internet access ---
 resource "aws_eip" "nat" {
-  # The 'instance' tag here is deprecated
   depends_on = [aws_internet_gateway.gw]
   tags = {
     Name = "${var.cluster_name}-nat-eip"
@@ -92,7 +91,7 @@ resource "aws_nat_gateway" "main" {
 }
 # ---------------------------------------------------------------------
 
-# --- ADDED: Route Table for the private subnet ---
+# --- Route Table for the private subnet ---
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
@@ -121,16 +120,13 @@ resource "aws_security_group" "public_access" {
   description = "Allow SSH and Ping inbound traffic"
   vpc_id      = aws_vpc.main.id
 
-  # --- ADD THIS NEW RULE ---
-  # This rule allows all inbound traffic from any instance within the VPC.
   ingress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # "-1" means all protocols
+    protocol    = "-1"
     cidr_blocks = [aws_vpc.main.cidr_block]
     description = "Allow all internal VPC traffic"
   }
-  # -------------------------
   
   ingress {
     from_port   = 22
@@ -178,24 +174,22 @@ resource "aws_key_pair" "deployer" {
 }
 
 resource "aws_instance" "server" {
-  count = 4
-
-  ami                      = "ami-020c6cfb9f8b61b53"
-  instance_type            = var.instance_type
+  count                  = 4
+  ami                    = "ami-020c6cfb9f8b61b53"
+  instance_type          = var.instance_type
+  private_ip             = var.server_private_ips[count.index]
 
   # --- Conditionally assign subnets ---
   # Servers 1 & 2 go in the public subnet; Servers 3 & 4 go in the private subnet.
-
-  subnet_id                = count.index < 2 ? aws_subnet.public.id : aws_subnet.private.id
+  subnet_id              = count.index < 2 ? aws_subnet.public.id : aws_subnet.private.id
   # ----------------------------------------------
+  
   vpc_security_group_ids = [aws_security_group.public_access.id]
-  key_name                 = aws_key_pair.deployer.key_name
-
-  # Pass ALL required variables to the template file.
-  user_data = templatefile("${path.module}/configure-instance.sh.tpl", {
-    edb_token    = var.edb_repo_token,  # For the EDB repository
-    server_index = count.index,         # To identify the server (for MinIO)
-    project      = var.project          # Required by another part of your script
+  key_name               = aws_key_pair.deployer.key_name
+  user_data              = templatefile("${path.module}/configure-instance.sh.tpl", {
+    edb_token    = var.edb_repo_token,
+    server_index = count.index,
+    project      = var.project
   })
 
   tags = {
@@ -205,7 +199,7 @@ resource "aws_instance" "server" {
 }
 
 resource "aws_eip" "public_ip" {
-  count = 2
+  count      = 2
   depends_on = [aws_instance.server]
   
   tags = {

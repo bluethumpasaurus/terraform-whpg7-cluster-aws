@@ -3,7 +3,7 @@ set -e
 #set -x
 
 # ==============================================================================
-# IMPORTANT: UPDATE THESE IP ADDRESSES
+# STATIC IP ADDRESSES DEFINED
 # ==============================================================================
 # Replace these placeholder IPs with the values from the 'terraform output'.
 SERVER1_PRIVATE_IP="10.0.1.100" # coordinator_private_ip
@@ -12,7 +12,7 @@ SERVER3_PRIVATE_IP="10.0.2.200" # segment_server_1_private_ip
 SERVER4_PRIVATE_IP="10.0.2.201" # segment_server_2_private_ip
 
 # ==============================================================================
-# SCRIPT CONFIGURATION (No changes needed below this line)
+# SCRIPT CONFIGURATION
 # ==============================================================================
 AWS_REGION="eu-west-2" # From variables.tf
 

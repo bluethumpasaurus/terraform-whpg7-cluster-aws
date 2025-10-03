@@ -151,7 +151,7 @@ The deployment process is broken down into two main phases:
 
     Once the deployment is complete, Terraform will display a list of outputs similar to those shown below. 
 
-    **Copy this entire output section to a text editor.** You will need these IP addresses for the next phase.
+    Copy the `ssh_command_for_whpg_coordinator` and `ssh_command_for_whpg_coordinator_standby` outputs, as you will need them to `ssh` to these hosts.
 
     ```
     Outputs:
@@ -198,18 +198,9 @@ The deployment process is broken down into two main phases:
 
     Copy the entire contents of the `setup_whpg.sh` file from this repository and paste it into the editor.
 
-5.  **❗ CRITICAL: Update IP Addresses**
-
-    This is the most important manual step. In the `setup_whpg.sh` file you just created, **update the placeholder IP addresses at the top** with the private IP addresses from your Terraform output.
-
-      * `SERVER1_PRIVATE_IP`: Use the `coordinator_private_ip` value.
-      * `SERVER2_PRIVATE_IP`: Use the `coordinator_standby_private_ip` value.
-      * `SERVER3_PRIVATE_IP`: Use the `segment_server_1_private_ip` value.
-      * `SERVER4_PRIVATE_IP`: Use the `segment_server_2_private_ip` value.
-
     Save and close the file.
 
-6.  **Run the Cluster Initialization Script**
+5.  **Run the Cluster Initialization Script**
 
     Make the script executable, `source` it and then run it. This will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
 
@@ -221,7 +212,7 @@ The deployment process is broken down into two main phases:
 
     The script will take a few minutes to complete.
 
-7.  **Verification**
+6.  **Verification**
 
     The script will automatically run `gpstate -f` and a `psql` query at the end to verify that the coordinator standby is active and that all segments are configured correctly.
 
@@ -251,10 +242,10 @@ MinIO Server is pre-installed on the Standby Coordinator node, with a MinIO driv
 
 1.  Ensure you are logged into the **coordinator node** as the **`gpadmin`** user.
 
-2.  Set up an `mc` alias to connect to the MinIO server on the **standby coordinator node** on the standby's private ip address.
+2.  Set up an `mc` alias to connect to the MinIO server on the **standby coordinator node**.
 
     ```bash
-    mc alias set standby_minio http://<standby_coordinator_private_ip>:9000/ minioadmin minioadmin
+    mc alias set standby_minio http://10.0.1.101:9000/ minioadmin minioadmin
     ```
 
 3.  With `mc` confirm the connection to the MinIO server on the **standby coordinator node**.
