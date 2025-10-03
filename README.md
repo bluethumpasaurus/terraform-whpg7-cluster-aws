@@ -114,7 +114,7 @@ The deployment process is broken down into two main phases:
 1.  **Clone the Repository**
 
     ```bash
-    git https://github.com/bluethumpasaurus/terraform-whpg7-cluster-aws
+    git clone https://github.com/bluethumpasaurus/terraform-whpg7-cluster-aws
     cd terraform-whpg7-cluster-aws
     ```
 
