@@ -217,7 +217,6 @@ The deployment process is broken down into two main phases:
     ```bash
     chmod +x setup_whpg.sh
     source setup_whpg.sh
-    ./setup_whpg.sh
     ```
 
     The script will take a few minutes to complete.
