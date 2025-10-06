@@ -30,10 +30,23 @@ echo "Setting ownership for WarehousePG directories"
 chown -R "gpadmin:gpadmin" /usr/local/greenplum*
 chgrp -R "gpadmin" /usr/local/greenplum*
 
+
 # --- Final SSH Configuration ---
-echo "Enabling PasswordAuthentication in sshd_config"
-sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
-sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+echo "Securing sshd: Disabling password authentication by default"
+# Ensure the default is 'no'. This handles both commented and uncommented lines.
+sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+
+# Define the conditional block to be added
+SSHD_MATCH_BLOCK="
+# Allow password authentication only from the internal network
+Match Address 10.0.0.0/8
+  PasswordAuthentication yes
+"
+
+# Append the Match block to the end of the file
+echo "$SSHD_MATCH_BLOCK" >> /etc/ssh/sshd_config
+
 systemctl restart sshd
 
 # --- Set system resources limits per WarehousePG docs & core size to unlimited ---
@@ -49,6 +62,16 @@ cat << EOF >> "$CONF_FILE"
 * hard nproc 131072
 * soft core unlimited
 EOF
+
+
+# Copy setup_whpg.sh file from repo to server 1 - WarehousePG Coordinator (index 0)
+if [ ${server_index} -eq 0 ]; then
+  echo "Downloading setup_whpg.sh file to server 1"
+  wget https://raw.githubusercontent.com/bluethumpasaurus/terraform-whpg7-cluster-aws/refs/heads/main/setup_whpg.sh
+  chmod +x setup_whpg.sh
+  mv setup_whpg.sh /home/gpadmin/setup_whpg.sh
+  chown gpadmin:gpadmin /home/gpadmin/setup_whpg.sh
+fi
 
 # Install MinIO client (mc) on server 1 - WarehousePG Coordinator (index 0)
 if [ ${server_index} -eq 0 ]; then
