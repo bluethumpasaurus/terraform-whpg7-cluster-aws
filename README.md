@@ -179,40 +179,26 @@ The deployment process is broken down into two main phases:
 
 2.  **Switch to the `gpadmin` User**
 
-    The `configure-instance.sh` script created a `gpadmin` user. Switch to this user to perform all cluster setup tasks. 
+    The repo's `configure-instance.sh.tpl` script created a `gpadmin` user. Switch to this user to perform the WarehousePG cluster initialisation tasks. 
 
 
     ```bash
     sudo su - gpadmin
     ```
 
-3.  **Create the Setup Script**
 
-    Use a text editor like `vi` or `nano` to create the setup script.
+3.  **Run the Cluster Initialization Script**
 
-    ```bash
-    vi setup_whpg.sh
-    ```
-
-4.  **Paste the Script Contents**
-
-    Copy the entire contents of the `setup_whpg.sh` file from this repository and paste it into the editor.
-
-    Save and close the file.
-
-5.  **Run the Cluster Initialization Script**
-
-    Make the script executable, `source` it and then run it. This will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
+    There will be a WarehousePG cluster initialisation script located at `/home/gpadmin/setup_whpg.sh`. `source` the script to run it. This will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
 
 
     ```bash
-    chmod +x setup_whpg.sh
     source setup_whpg.sh
     ```
 
     The script will take a few minutes to complete.
 
-6.  **Verification**
+4.  **Verification**
 
     The script will automatically run `gpstate -f` and a `psql` query at the end to verify that the coordinator standby is active and that all segments are configured correctly.
 
@@ -224,7 +210,7 @@ Once the setup is complete, you can connect to your new WarehousePG database.
 
 1.  Ensure you are logged into the **coordinator node** as the **`gpadmin`** user.
 
-2.  The `setup_whpg.sh` script configured the `.bashrc` file with the necessary environment variables. Simply run `psql`:
+2.  The `/home/gpadmin/setup_whpg.sh` script will have configured the `.bashrc` file with the necessary environment variables. Simply run `psql`:
 
     ```bash
     psql
