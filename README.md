@@ -189,7 +189,9 @@ The deployment process is broken down into two main phases:
 
 3.  **Run the Cluster Initialization Script**
 
-    There will be a WarehousePG cluster initialisation script located at `/home/gpadmin/setup_whpg.sh`. `source` the script to run it. This will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
+    There will be a WarehousePG cluster initialisation script located at `/home/gpadmin/setup_whpg.sh`. 
+
+    `source` the script to run it - this will set up passwordless SSH, create data directories, initialize the WarehousePG database system, and add a Standby Coordinator.
 
 
     ```bash
