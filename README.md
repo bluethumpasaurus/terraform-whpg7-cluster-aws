@@ -261,9 +261,9 @@ Type `yes` when prompted to confirm the deletion.
 
 1.  Possible AMI Issues if deploying to an AWS region other than **eu-west-2**:
 
-**Note** that the repo's `main.tf` script hard-codes the AMI for Rocky Linux 8.9 in the **eu-west-2** AWS region.
-These AMI codes are not guaranteed to be uniform across AWS regions, unfortunately. 
-This means so you will likely need to replace the AMI identifier in the repo's `main.tf` script with a region-specific one, if you are deploying to a region other than **eu-west-2**.
+- **Note** that the repo's `main.tf` script hard-codes the AMI for Rocky Linux 8.9 in the **eu-west-2** AWS region.
+- These AMI codes are not guaranteed to be uniform across AWS regions, unfortunately. 
+- This means so you will likely need to replace the AMI identifier in the repo's `main.tf` script with a region-specific one, if you are deploying to a region other than **eu-west-2**.
 
 
 
