@@ -179,6 +179,13 @@ resource "aws_instance" "server" {
   instance_type          = var.instance_type
   private_ip             = var.server_private_ips[count.index]
 
+  # Resize the root volume to 30GiB
+  root_block_device {
+    volume_size = 30    # Size in GiB
+    volume_type = "gp3" # Recommended: cheaper and faster than gp2
+    # iops      = 3000  # Optional: Default for gp3 is 3000
+  }          = var.server_private_ips[count.index]
+
   # --- Conditionally assign subnets ---
   # Servers 1 & 2 go in the public subnet; Servers 3 & 4 go in the private subnet.
   subnet_id              = count.index < 2 ? aws_subnet.public.id : aws_subnet.private.id
