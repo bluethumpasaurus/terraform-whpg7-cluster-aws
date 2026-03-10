@@ -184,7 +184,7 @@ resource "aws_instance" "server" {
     volume_size = 30    # Size in GiB
     volume_type = "gp3" # Recommended: cheaper and faster than gp2
     # iops      = 3000  # Optional: Default for gp3 is 3000
-  }          = var.server_private_ips[count.index]
+  }
 
   # --- Conditionally assign subnets ---
   # Servers 1 & 2 go in the public subnet; Servers 3 & 4 go in the private subnet.
