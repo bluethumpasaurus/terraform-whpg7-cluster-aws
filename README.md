@@ -5,7 +5,9 @@
 
 This repository provides a set of Terraform configurations and helper scripts to automate the deployment of a 4-node <a href="https://warehouse-pg.io/" target="_blank" rel="noopener noreferrer">WarehousePG 7</a> cluster on AWS.
 
-The cluster will also have MinIO Server pre-installed on the Standby Coordinator node.
+The cluster will be configured with Resource Groups on cgroups v1.
+
+Also, the cluster will have MinIO Server pre-installed on the Standby Coordinator node.
 
 The deployment is managed by a user-friendly wrapper script (`deploy.sh`) that prompts for necessary configuration details, making the setup process straightforward.
 
@@ -265,5 +267,25 @@ Type `yes` when prompted to confirm the deletion.
 - These AMI codes are not guaranteed to be uniform across AWS regions, unfortunately. 
 - This means so you will likely need to replace the AMI identifier in the 'COMPUTE' section of the repo's `main.tf` script with a region-specific one, if you are deploying to a region other than **eu-west-2**.
 
+2.  `Error: No valid credential sources found` when running either the `deploy.sh` script, or the `terraform destroy` cleanup:
 
+- The error will be of the type below:
+
+```bash
+│ Error: No valid credential sources found
+│
+│   with provider["registry.terraform.io/hashicorp/aws"],
+│   on main.tf line 10, in provider "aws":
+│   10: provider "aws" {
+│
+│ Please see https://registry.terraform.io/providers/hashicorp/aws
+│ for more information about providing credentials.
+│
+│ Error: failed to refresh cached credentials, refresh cached SSO token failed, unable to refresh SSO token, operation error SSO OIDC: CreateToken, https response error StatusCode: 400, RequestID: 11ff1111-ecfc-1b1d-1111-1b1d11bf1111,
+│ InvalidGrantException:
+```
+- This can be fixed by refreshing the sso session for your AWS profile, so you can run AWS CLI commands from your machine:
+```bash
+aws configure sso --profile [profile-name]
+```
 
