@@ -64,6 +64,39 @@ cat << EOF >> "$CONF_FILE"
 EOF
 
 
+# --- Setup cgroups v1 for Resource Groups ---
+# Define the block to be appended to /etc/cgconfig.conf
+CGROUP_BLOCK="
+group gpdb {
+     perm {
+         task {
+             uid = gpadmin;
+             gid = gpadmin;
+         }
+         admin {
+             uid = gpadmin;
+             gid = gpadmin;
+         }
+     }
+     cpu {
+     }
+     cpuacct {
+     }
+     cpuset {
+     }
+     memory {
+     }
+}
+"
+
+# Append the block to the end of the /etc/cgconfig.conf file
+echo "$CGROUP_BLOCK" >> /etc/cgconfig.conf
+
+# Start & Enable cgconfig.service
+systemctl start cgconfig.service
+systemctl enable cgconfig.service
+
+
 # Copy setup_whpg.sh file from repo to server 1 - WarehousePG Coordinator (index 0)
 if [ ${server_index} -eq 0 ]; then
   echo "Downloading setup_whpg.sh file to server 1"
