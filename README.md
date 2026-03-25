@@ -284,7 +284,7 @@ Type `yes` when prompted to confirm the deletion.
 │ Error: failed to refresh cached credentials, refresh cached SSO token failed, unable to refresh SSO token, operation error SSO OIDC: CreateToken, https response error StatusCode: 400, RequestID: 11ff1111-ecfc-1b1d-1111-1b1d11bf1111,
 │ InvalidGrantException:
 ```
-- This can be fixed by refreshing the sso session for your AWS profile, so you can run AWS CLI commands from your machine:
+- This can be fixed by refreshing the sso session for your AWS profile:
 ```bash
 aws configure sso --profile [profile-name]
 ```
